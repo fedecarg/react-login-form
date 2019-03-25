@@ -4,7 +4,7 @@ import driver from '../lib/driver';
 
 Then(/^I should see the title$/, async () => {
   const title = await driver.findElement({ css: 'h1' }).getText();
-  const expected = 'Auth0 Login';
+  const expected = 'Login Form';
 
   expect(title).toContain(expected);
 });
