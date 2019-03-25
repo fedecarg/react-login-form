@@ -1,4 +1,4 @@
-# Authentication with React and Auth0
+# Toggle Password Visibility
 
 ## Documentation
 
