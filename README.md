@@ -1,9 +1,7 @@
-# Toggle Password Visibility
+# Password Visibility Toggle
 
-## Documentation
-
-- [Create React App](https://facebook.github.io/create-react-app/) – How to develop apps bootstrapped with Create React App.
-
+ Allowing users to toggle password input visibility removes friction and improves user experience
+ 
 ## Getting started
 
 ```
