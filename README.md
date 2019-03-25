@@ -57,12 +57,4 @@ $ npm version <patch|minor|major> -m "Upgrade to version %s"
 $ git push origin <version>
 ```
 
-Or, you can execute the following bash script:
-```
-$ sh aws/circleci-deploy.sh --version <patch|minor|major>
-To github.com:fedecarg/react-auth0-login.git
- * [new tag]         v0.1.00 -> v0.1.00
-Deploying tag v0.1.00 ...
-```
-
 
