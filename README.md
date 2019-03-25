@@ -5,7 +5,8 @@
 ## Getting started
 
 ```
-cd react-auth0-login
+cd react-login-form
+npm install
 npm start
 ```
 
