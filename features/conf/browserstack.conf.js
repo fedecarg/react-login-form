@@ -6,7 +6,7 @@ const {
 } = process.env;
 
 const defaultCapabilities = {
-  project: 'Auth0 Login',
+  project: 'Login Form',
   build: CIRCLE_BRANCH,
   name: `${CIRCLE_BRANCH}/${CIRCLE_BUILD_NUM}`,
   'browserstack.debug': 'true',
