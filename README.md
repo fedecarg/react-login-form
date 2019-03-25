@@ -53,7 +53,7 @@ CircleCI treats tags and branches differently when deciding which job should run
 ## CircleCI
 You can trigger a CircleCI job by creating and pushing a tag:
 ```
-$ npm version <patch|minor|major> -m "Upgrade to version %s"
+$ npm version <patch|minor|major> -m "Upgrade to version <version>"
 $ git push origin <version>
 ```
 
