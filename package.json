@@ -1,0 +1,69 @@
+{
+  "name": "react-auth0-login",
+  "version": " 1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test:unit": "react-scripts test --env=jsdom",
+    "test:browser": "USE_BROWSERSTACK=true cucumber-js",
+    "test:browser:local": "cucumber-js",
+    "test:browser:debug": "DEBUG=true cucumber-js",
+    "test:mockapi": "simulado",
+    "lint": "./node_modules/.bin/eslint --fix --ext .js --ext .jsx ./src ./features",
+    "eject": "react-scripts eject"
+  },
+  "pre-commit": [
+    "lint"
+  ],
+  "jest": {
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ]
+  },
+  "dependencies": {
+    "i18n": "^0.8.3",
+    "i18next": "^11.5.0",
+    "i18next-xhr-backend": "^1.5.1",
+    "node-sass": "^4.9.3",
+    "polished": "^2.0.3",
+    "prop-types": "^15.6.2",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-scripts": "2.0.3",
+    "styled-components": "^3.4.9"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/register": "^7.0.0",
+    "babel-plugin-styled-components": "^1.8.0",
+    "browserstack-local": "^1.3.4",
+    "chromedriver": "^2.41.0",
+    "cucumber": "^4.2.1",
+    "cucumber-pretty": "^1.4.4",
+    "enzyme": "^3.7.0",
+    "enzyme-adapter-react-16": "^1.6.0",
+    "enzyme-to-json": "^3.3.4",
+    "expect": "^23.6.0",
+    "fs-extra": "^7.0.0",
+    "jest-enzyme": "^6.1.2",
+    "jest-styled-components": "^6.2.1",
+    "json-server": "^0.14.0",
+    "passport": "^0.4.0",
+    "passport-http": "^0.3.0",
+    "pre-commit": "^1.2.2",
+    "prettier": "1.14.3",
+    "react-router-dom": "^4.3.1",
+    "selenium-webdriver": "^4.0.0-alpha.1",
+    "simulado": "^3.2.2"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

@@ -1,0 +1,256 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:10.11.0-browsers
+
+aliases:
+  - &restore_cache
+    restore_cache:
+      keys:
+        - node-dependencies-{{ checksum "package.json" }}
+
+  - &install_terraform
+    run:
+      name: Install terraform
+      command: |
+        wget https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip
+        sudo unzip terraform_0.11.7_linux_amd64.zip -d /usr/local/bin
+jobs:
+  install_dependencies:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore_cache
+      - run: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: node-dependencies-{{ checksum "package.json" }}
+
+  linting:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore_cache
+      - run: npm run lint
+
+  test_unit:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore_cache
+      - run: npm run test:unit
+
+  test_browser:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore_cache
+      - run:
+          name: Start app
+          command: npm start
+          background: true
+
+      # wait for the server to start responding.
+      - run:
+          name: Waiting for app starting
+          shell: /bin/sh
+          command: wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:3000
+      - run: npm run test:browser
+      - store_artifacts:
+          path: ~/repo/features/screenshots/
+
+  deploy_to_dev:
+    working_directory: ~/repo
+    machine: true
+    steps:
+      - checkout
+      - *restore_cache
+      - *install_terraform
+      - run:
+          name: Install awscli
+          command: sh scripts/circleci-install-aws-cli.sh
+      - run:
+          name: 'Add AWS keys'
+          command: sh scripts/circleci-add-aws-keys.sh
+      - run:
+          name: Publish docker image
+          command: APP_ENV=dev DEPLOY_ENV=dev sh scripts/docker-publish.sh
+      - run:
+          name: Deploy docker container
+          command: APP_ENV=dev DEPLOY_ENV=dev sh scripts/deploy.sh
+
+  deploy_to_staging:
+    working_directory: ~/repo
+    machine: true
+    steps:
+      - checkout
+      - *restore_cache
+      - *install_terraform
+      - run:
+          name: Install awscli
+          command: sh scripts/circleci-install-aws-cli.sh
+      - run:
+          name: 'Add AWS keys'
+          command: sh scripts/circleci-add-aws-keys.sh
+      - run:
+          name: Deploy docker container
+          command: APP_ENV=staging DEPLOY_ENV=staging sh scripts/deploy.sh
+
+  deploy_to_production:
+    working_directory: ~/repo
+    machine: true
+    steps:
+      - run:
+          name: Deploy to prod placeholder
+          command: echo "Deploy to prod placeholder"
+
+workflows:
+  version: 2
+  #
+  # Git "Any" Branch Job
+  # Build and test job for any branch except master
+  #
+  build_and_test_workflow:
+    jobs:
+      - install_dependencies:
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              ignore: master
+      - linting:
+          requires:
+            - install_dependencies
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              ignore: master
+      - test_unit:
+          requires:
+            - linting
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              ignore: master
+      - test_browser:
+          requires:
+            - linting
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              ignore: master
+
+  #
+  # Git "Master" Branch Job
+  # Deploy job for the master branch
+  #
+  deploy_master_branch_workflow:
+    jobs:
+      - install_dependencies:
+          filters:
+            branches:
+              only: master
+      - linting:
+          requires:
+            - install_dependencies
+          filters:
+            branches:
+              only: master
+      - test_unit:
+          requires:
+            - linting
+          filters:
+            branches:
+              only: master
+      - test_browser:
+          requires:
+            - linting
+          filters:
+            branches:
+              only: master
+      - deploy_to_dev:
+          requires:
+            - linting
+            - test_unit
+            - test_browser
+          filters:
+            branches:
+              only: master
+      - progress_to_staging:
+          type: approval
+          requires:
+            - linting
+            - test_unit
+            - test_browser
+            - deploy_to_dev
+          filters:
+            branches:
+              only: master
+      - deploy_to_staging:
+          requires:
+            - progress_to_staging
+          filters:
+            branches:
+              only: master
+
+  #
+  # Git "Any" Tag Job
+  # Deploy job for tags marked with a version number (ex: v1.0.0)
+  #
+  deploy_tag_workflow:
+    jobs:
+      - install_dependencies:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - linting:
+          requires:
+            - install_dependencies
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - test_unit:
+          requires:
+            - linting
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - test_browser:
+          requires:
+            - linting
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - progress_to_production:
+          type: approval
+          requires:
+            - linting
+            - test_unit
+            - test_browser
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - deploy_to_production:
+          requires:
+            - progress_to_production
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
